@@ -24,4 +24,4 @@ SafeSphere is a single-page, offline-friendly web application designed to enhanc
 - Region-specific focus
 
 ## Demo
-Demo video link will be added here.
+https://www.loom.com/share/acb5b2c3d633429ca83cd80fc4c64382
