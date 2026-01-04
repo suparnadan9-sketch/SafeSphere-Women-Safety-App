@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeSphere – Women Safety Hub</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #fafafa;
+    color: #333;
+}
+header {
+    background: #e91e63;
+    color: white;
+    padding: 16px;
+    text-align: center;
+}
+.container {
+    padding: 16px;
+}
+h2 {
+    color: #e91e63;
+}
+.button {
+    width: 100%;
+    padding: 14px;
+    margin: 8px 0;
+    background: #e91e63;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+}
+.button.secondary {
+    background: #444;
+}
+.card {
+    background: white;
+    padding: 14px;
+    margin: 14px 0;
+    border-radius: 10px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+}
+textarea, input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 8px;
+}
+ul {
+    padding-left: 20px;
+}
+footer {
+    text-align: center;
+    padding: 12px;
+    font-size: 13px;
+    background: #f1f1f1;
+}
+#status {
+    font-size: 14px;
+    margin-top: 6px;
+}
+#offlineStatus {
+    text-align: center;
+    font-size: 14px;
+    margin-top: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>SafeSphere</h1>
+    <p>Offline-Friendly Women Safety Single-Page Web App</p>
+    <p id="offlineStatus"></p>
+</header>
+
+<div class="container">
+
+<!-- SOS CALL -->
+<button class="button" onclick="callSOS()">🚨 SOS Call</button>
+
+<!-- SMS ALERT -->
+<button class="button" onclick="sendSMS()">📩 Send SOS SMS</button>
+
+<!-- HELPLINES -->
+<div class="card">
+    <h2>📞 Emergency Helplines (West Bengal)</h2>
+    <p><b>Women Police Helpline (WB):</b> <a href="tel:1091">1091</a></p>
+    <p><b>National Women Helpline:</b> <a href="tel:181">181</a></p>
+    <p><b>Kolkata Police Control Room:</b> <a href="tel:03325555970">033-2555-5970</a></p>
+    <p><b>Childline (Girls below 18):</b> <a href="tel:1098">1098</a></p>
+</div>
+
+<!-- LOCATION -->
+<div class="card">
+    <h2>📍 Location</h2>
+    <p id="locationText">Location not shared</p>
+    <button class="button secondary" onclick="getLocation()">Share Location</button>
+</div>
+
+<!-- SAFETY TIPS -->
+<div class="card">
+    <h2>🛡️ Safety Tips</h2>
+    <ul>
+        <li>Share live location when travelling alone</li>
+        <li>Avoid poorly lit areas at night</li>
+        <li>Trust your instincts</li>
+        <li>Keep emergency numbers accessible</li>
+        <li>Stay alert in public transport</li>
+    </ul>
+</div>
+
+<!-- REPORT INCIDENT -->
+<div class="card">
+    <h2>📝 Report an Incident</h2>
+    <textarea id="reportInput" rows="4" placeholder="Describe the incident..."></textarea>
+    <button class="button" onclick="saveReport()">Save Report</button>
+    <p id="status"></p>
+</div>
+
+<!-- STORED REPORTS -->
+<div class="card">
+    <h2>📂 Saved Reports (Offline)</h2>
+    <ul id="reportList"></ul>
+</div>
+
+</div>
+
+<footer>
+    SafeSphere • Built for Social Impact • Single Page Only
+</footer>
+
+<script>
+let userLocation = "Location not available";
+
+// SOS CALL
+function callSOS() {
+    window.location.href = "tel:181";
+}
+
+// SMS ALERT
+function sendSMS() {
+    let phone = "1091";
+    let message = "EMERGENCY! I need help. My location: " + userLocation;
+    window.location.href = "sms:" + phone + "?body=" + encodeURIComponent(message);
+}
+
+// GET LOCATION
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                userLocation =
+                    "Lat " + position.coords.latitude.toFixed(4) +
+                    ", Lon " + position.coords.longitude.toFixed(4);
+                document.getElementById("locationText").innerText = userLocation;
+            },
+            () => {
+                document.getElementById("locationText").innerText =
+                    "Location access denied";
+            }
+        );
+    } else {
+        document.getElementById("locationText").innerText =
+            "Geolocation not supported";
+    }
+}
+
+// SAVE REPORT (OFFLINE)
+function saveReport() {
+    let text = document.getElementById("reportInput").value.trim();
+    if (!text) {
+        document.getElementById("status").innerText =
+            "Please enter a report.";
+        return;
+    }
+
+    let reports = JSON.parse(localStorage.getItem("reports")) || [];
+    reports.push({
+        text: text,
+        time: new Date().toLocaleString()
+    });
+
+    localStorage.setItem("reports", JSON.stringify(reports));
+    document.getElementById("reportInput").value = "";
+    document.getElementById("status").innerText =
+        "Report saved locally (offline).";
+
+    loadReports();
+}
+
+// LOAD REPORTS
+function loadReports() {
+    let reports = JSON.parse(localStorage.getItem("reports")) || [];
+    let list = document.getElementById("reportList");
+    list.innerHTML = "";
+
+    reports.forEach(r => {
+        let li = document.createElement("li");
+        li.innerText = r.time + " — " + r.text;
+        list.appendChild(li);
+    });
+}
+
+// ONLINE / OFFLINE STATUS
+function updateOnlineStatus() {
+    let status = document.getElementById("offlineStatus");
+    status.innerText = navigator.onLine
+        ? "🟢 Online"
+        : "🔴 Offline Mode Active";
+}
+
+window.addEventListener("load", () => {
+    updateOnlineStatus();
+    loadReports();
+});
+window.addEventListener("online", updateOnlineStatus);
+window.addEventListener("offline", updateOnlineStatus);
+</script>
+
+</body>
+</html>
