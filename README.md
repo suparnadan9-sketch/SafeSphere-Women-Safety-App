@@ -12,7 +12,7 @@ SafeSphere is a single-page, offline-friendly web application designed to enhanc
 - Location sharing
 - Safety tips
 
-## Technology Used
+## Programming Languages Used
 - HTML
 - CSS
 - JavaScript
